@@ -1,0 +1,8 @@
+import(stats)
+import(methods)
+import(SeqArray)
+import(SeqVarTools)
+import(Biobase)
+import(genesis2tests)
+
+exportMethods("assocTestMM2", "fitNullModel2")

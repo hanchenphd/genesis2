@@ -1,0 +1,13 @@
+Package: genesis2
+Version: 0.1.0
+Type: Package
+Title: genesis assocation testing code rewrite
+Description: Methods to read data from GDS files and call statistical functions in genesis2_tests.
+Author: Matthew P. Conomos, Stephanie M. Gogarten
+Maintainer: Stephanie M. Gogarten <sdmorris@uw.edu>
+Depends: 
+Imports: stats, methods, SeqArray, SeqVarTools, Biobase, genesis2tests
+Suggests: testthat
+License: GPL-3
+biocViews: SNP, GeneticVariability, Genetics, StatisticalMethod
+NeedsCompilation: no
