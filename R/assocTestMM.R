@@ -1,5 +1,8 @@
 setGeneric("assocTestMM2", function(gdsobj, ...) standardGeneric("assocTestMM2"))
 
+## arguments to add: test (Wald or Score), ivars
+## do we want the ivars.return.betaCov option?
+## do we want to make imputing to the mean optional?
 setMethod("assocTestMM2",
           "SeqVarData",
           function(gdsobj, nullModel, verbose=TRUE) {
@@ -12,13 +15,13 @@ setMethod("assocTestMM2",
                   
                   geno <- expandedAltDosage(gdsobj)
                   
+                  # allele frequency
+                  freq <- .alleleFreq(geno)
+
                   # take note of number of non-missing samples
                   n.miss <- colSums(is.na(geno))
                   n.obs <- nrow(geno) - n.miss
                   
-                  # allele frequency (account for sex?)
-                  freq <- 0.5*colMeans(geno, na.rm=TRUE)
-
                   # mean impute missing values
                   if (sum(n.miss) > 0) {
                       geno <- .meanImpute(geno, freq)
@@ -33,10 +36,3 @@ setMethod("assocTestMM2",
 
               do.call(rbind, res)
           })
-
-.meanImpute <- function(geno, freq) {
-    miss.idx <- which(is.na(geno))
-    miss.var.idx <- ceiling(miss.idx/nrow(geno))
-    geno[miss.idx] <- 2*freq[miss.var.idx]
-    geno
-}

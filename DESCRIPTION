@@ -7,7 +7,7 @@ Author: Matthew P. Conomos, Stephanie M. Gogarten
 Maintainer: Stephanie M. Gogarten <sdmorris@uw.edu>
 Depends: 
 Imports: stats, methods, SeqArray, SeqVarTools, Biobase, genesis2tests
-Suggests: testthat
+Suggests: testthat, GenomicRanges
 License: GPL-3
 biocViews: SNP, GeneticVariability, Genetics, StatisticalMethod
 NeedsCompilation: no
