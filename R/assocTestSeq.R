@@ -37,8 +37,7 @@ setMethod("assocTestSeq2",
                   # then subset var.info, geno, freq
 
                   # take note of number of non-missing samples
-                  n.miss <- colSums(is.na(geno))
-                  n.obs <- nrow(geno) - n.miss
+                  n.obs <- colSums(!is.na(geno))
                   
                   # number of variant sites
                   n.site <- length(unique(var.info$variant.id))
@@ -50,7 +49,7 @@ setMethod("assocTestSeq2",
                   n.sample.alt <- sum(rowSums(geno, na.rm=TRUE) > 0)
                   
                   # mean impute missing values
-                  if (sum(n.miss) > 0) {
+                  if (any(n.obs < nrow(geno))) {
                       geno <- .meanImpute(geno, freq)
                   }
 

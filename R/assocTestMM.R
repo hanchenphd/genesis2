@@ -19,11 +19,10 @@ setMethod("assocTestMM2",
                   freq <- .alleleFreq(geno)
 
                   # take note of number of non-missing samples
-                  n.miss <- colSums(is.na(geno))
-                  n.obs <- nrow(geno) - n.miss
+                  n.obs <- colSums(!is.na(geno))
                   
                   # mean impute missing values
-                  if (sum(n.miss) > 0) {
+                  if (any(n.obs < nrow(geno))) {
                       geno <- .meanImpute(geno, freq)
                   }
 
