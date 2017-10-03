@@ -43,3 +43,31 @@ test_that("null model", {
     expect_equal(rownames(nm$model.matrix), keep)
     expect_equal(nm$workingY, dat$a[c(TRUE,FALSE)])
 })
+
+
+
+test_that("fitNullMM2 matches fitNulMM", {
+    library(SeqVarTools)
+    library(Biobase)
+    svd <- .testData()
+    grm <- .testGRM(svd)
+    lmm.genesis <- GENESIS::fitNullMM(sampleData(svd), outcome="outcome", covars=c("sex", "age"), covMatList=grm, verbose=FALSE)
+    nullmod <- fitNullModel2(svd, outcome="outcome", covars=c("sex", "age"), covMatList=grm, verbose=FALSE)
+
+    expect_true(all(abs(nullmod$fixef - lmm.genesis$fixef) < 1e-9))
+    expect_true(all(abs(nullmod$betaCov - lmm.genesis$betaCov) < 1e-9))
+    expect_true(all(abs(nullmod$resid.marginal - lmm.genesis$resid.response) < 1e-9))
+    expect_true(all(abs(nullmod$logLik - lmm.genesis$logLik) < 1e-9))
+    expect_true(all(abs(nullmod$logLikR - lmm.genesis$logLikR) < 1e-9))
+    expect_true(all(abs(nullmod$AIC - lmm.genesis$AIC) < 1e-9))
+    expect_true(all(nullmod$workingY == lmm.genesis$workingY))
+    expect_true(all(nullmod$model.matrix == lmm.genesis$model.matrix))
+    expect_true(all(abs(nullmod$varComp - lmm.genesis$varComp) < 1e-9))
+    expect_true(all(abs(nullmod$varCompCov - lmm.genesis$varCompCov) < 1e-9)) 
+    expect_equal(nullmod$family$family, lmm.genesis$family$family)
+    expect_true(all(nullmod$zeroFLAG == lmm.genesis$zeroFLAG))
+    expect_true(all(abs(nullmod$cholSigmaInv - lmm.genesis$cholSigmaInv) < 1e-9))
+    expect_true(all(abs(nullmod$RSS - lmm.genesis$RSS) < 1e-9))
+
+    seqClose(svd)
+})

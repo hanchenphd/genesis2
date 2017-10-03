@@ -31,7 +31,7 @@ setMethod("assocTestSeq2",
                   geno <- expandedAltDosage(gdsobj)
                   
                   # allele frequency
-                  freq <- .alleleFreq(geno)
+                  freq <- .alleleFreq(gdsobj, geno)
 
                   # if we are filtering on freq in function, do it here
                   # then subset var.info, geno, freq
