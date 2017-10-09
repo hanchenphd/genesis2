@@ -4,5 +4,6 @@ import(SeqArray)
 import(SeqVarTools)
 import(Biobase)
 import(genesis2tests)
+importFrom(dplyr, bind_rows)
 
-exportMethods("assocTestMM2", "fitNullModel2")
+exportMethods("assocTestMM2", "assocTestSeq2", "fitNullModel2")

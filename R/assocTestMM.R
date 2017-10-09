@@ -5,6 +5,8 @@ setGeneric("assocTestMM2", function(gdsobj, ...) standardGeneric("assocTestMM2")
 setMethod("assocTestMM2",
           "SeqVarData",
           function(gdsobj, nullModel, test = c("Wald", "Score"), ivars = NULL, verbose=TRUE) {
+              test <- match.arg(test)
+              
               # results
               res <- list()
               i <- 1

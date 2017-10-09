@@ -6,16 +6,13 @@ setGeneric("assocTestSeq2", function(gdsobj, ...) standardGeneric("assocTestSeq2
 ## previously, returned rows in variantInfo for high-freq variants but set weight to 0
 ##  - why do this instead of just filtering?
 
-## arguments to add:
-## test (Burden or SKAT)
-## burden.test (Score or Wald)
-## rho
-## pval.method (davies, kuonen, liu)
-
 setMethod("assocTestSeq2",
           "SeqVarData",
           function(gdsobj, nullModel,
                    weight.beta=c(1,1), weight.user=NULL,
+                   test=c("Burden", "SKAT"),
+                   burden.test=c("Score", "Wald"), rho=0,
+                   pval.method=c("davies", "kuonen", "liu"),
                    verbose=TRUE) {
 
               # check argument values
@@ -26,6 +23,10 @@ setMethod("assocTestSeq2",
               i <- 1
               iterate <- TRUE
               while (iterate) {
+                  test <- match.arg(test)
+                  burden.test <- match.arg(burden.test)
+                  pval.method <- match.arg(pval.method)
+                  
                   var.info <- variantInfo(gdsobj, alleles=FALSE, expanded=TRUE)
                   
                   geno <- expandedAltDosage(gdsobj)
@@ -33,12 +34,14 @@ setMethod("assocTestSeq2",
                   # allele frequency
                   freq <- .alleleFreq(gdsobj, geno)
 
-                  # if we are filtering on freq in function, do it here
-                  # then subset var.info, geno, freq
+                  # exclude monomorphic variants
+                  mono <- freq %in% c(0,1)
+                  if (any(mono)) {
+                      var.info <- var.info[!mono,,drop=FALSE]
+                      geno <- geno[,!mono,drop=FALSE]
+                      freq <- freq[!mono]
+                  }
 
-                  # take note of number of non-missing samples
-                  n.obs <- colSums(!is.na(geno))
-                  
                   # number of variant sites
                   n.site <- length(unique(var.info$variant.id))
 
@@ -47,12 +50,10 @@ setMethod("assocTestSeq2",
                   
                   # number of samples with observed alternate alleles > 0
                   n.sample.alt <- sum(rowSums(geno, na.rm=TRUE) > 0)
+               
+                  # number of non-missing samples
+                  n.obs <- colSums(!is.na(geno))
                   
-                  # mean impute missing values
-                  if (any(n.obs < nrow(geno))) {
-                      geno <- .meanImpute(geno, freq)
-                  }
-
                   # weights
                   if (is.null(weight.user)) {
                       # Beta weights
@@ -60,16 +61,29 @@ setMethod("assocTestSeq2",
                   } else {
                       # user supplied weights
                       weight <- variantData(gdsobj)[[weight.user]][expandedVariantIndex(gdsobj)]
-                      # if we subset based on frequency, will need to do it again here
+                      weight <- weight[!mono]
+                  }
+                  
+                  res[[i]] <- data.frame(n.site, n.alt, n.sample.alt)
+                  res.var[[i]] <- cbind(var.info, n.obs, freq, weight)
+                  
+                  if (n.site > 0) {
+                      # mean impute missing values
+                      if (any(n.obs < nrow(geno))) {
+                          geno <- .meanImpute(geno, freq)
+                      }
+
+                      # do the test
+                      nullPrep <- nullModelTestPrep(nullModel)
+                      assoc <- testVariantSet(nullPrep, G=geno, weights=weight, test=test, 
+                                              burden.test=burden.test, rho=rho,
+                                              pval.method=pval.method)
+                      res[[i]] <- cbind(res[[i]], as.list(assoc))
                   }
 
-                  # do the test
-
-                  res[[i]] <- cbind(n.site, n.alt, n.sample.alt)
-                  res.var[[i]] <- cbind(var.info, n.obs, freq, weight)
                   i <- i + 1
                   iterate <- iterateFilter(gdsobj, verbose=verbose)
               }
 
-              list(results=do.call(rbind, res), variantInfo=res.var)
+              list(results=bind_rows(res), variantInfo=res.var)
           })

@@ -13,7 +13,6 @@ test_that("assocTestMM2", {
 
 
 test_that("assocTestMM2 matches assocTestMM - Wald", {
-    library(GENESIS)
     svd <- .testData()
     grm <- .testGRM(svd)
     seqResetFilter(svd, verbose=FALSE)
@@ -21,7 +20,7 @@ test_that("assocTestMM2 matches assocTestMM - Wald", {
     
     # multiallelic variants are handled differently
     snv <- isSNV(svd, biallelic=TRUE)
-    assoc1 <- assocTestMM(svd, nullmod, snp.include=which(snv), verbose=FALSE)
+    assoc1 <- GENESIS::assocTestMM(svd, nullmod, snp.include=which(snv), verbose=FALSE)
     
     seqSetFilter(svd, variant.sel=snv, verbose=FALSE)
     iterator <- SeqVarBlockIterator(svd, variantBlock=500, verbose=FALSE)
@@ -44,7 +43,6 @@ test_that("assocTestMM2 matches assocTestMM - Wald", {
 
 
 test_that("assocTestMM2 matches assocTestMM - Score", {
-    library(GENESIS)
     svd <- .testData()
     grm <- .testGRM(svd)
     seqResetFilter(svd, verbose=FALSE)
@@ -52,7 +50,7 @@ test_that("assocTestMM2 matches assocTestMM - Score", {
     
     # multiallelic variants are handled differently
     snv <- isSNV(svd, biallelic=TRUE)
-    assoc1 <- assocTestMM(svd, nullmod, test="Score", snp.include=which(snv), verbose=FALSE)
+    assoc1 <- GENESIS::assocTestMM(svd, nullmod, test="Score", snp.include=which(snv), verbose=FALSE)
     
     seqSetFilter(svd, variant.sel=snv, verbose=FALSE)
     iterator <- SeqVarBlockIterator(svd, variantBlock=500, verbose=FALSE)
