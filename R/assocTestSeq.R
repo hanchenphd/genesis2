@@ -78,7 +78,7 @@ setMethod("assocTestSeq2",
                       assoc <- testVariantSet(nullPrep, G=geno, weights=weight, test=test, 
                                               burden.test=burden.test, rho=rho,
                                               pval.method=pval.method)
-                      res[[i]] <- cbind(res[[i]], as.list(assoc))
+                      res[[i]] <- cbind(res[[i]], assoc)
                   }
 
                   i <- i + 1
