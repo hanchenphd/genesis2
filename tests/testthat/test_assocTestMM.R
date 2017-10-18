@@ -65,3 +65,28 @@ test_that("assocTestMM2 matches assocTestMM - Score", {
     
     seqClose(svd)
 })
+
+
+test_that("assocTestMM2 matches assocTestMM - binary", {
+    svd <- .testData()
+    grm <- .testGRM(svd)
+    seqResetFilter(svd, verbose=FALSE)
+    nullmod <- fitNullModel2(svd, outcome="status", covars=c("sex", "age"), covMatList=grm, family="binomial", verbose=FALSE)
+    
+    # multiallelic variants are handled differently
+    snv <- isSNV(svd, biallelic=TRUE)
+    assoc1 <- GENESIS::assocTestMM(svd, nullmod, test="Score", snp.include=which(snv), verbose=FALSE)
+    
+    seqSetFilter(svd, variant.sel=snv, verbose=FALSE)
+    iterator <- SeqVarBlockIterator(svd, variantBlock=500, verbose=FALSE)
+    assoc2 <- assocTestMM2(iterator, nullmod, test="Score", verbose=FALSE)
+    not1 <- setdiff(assoc2$variant.id, assoc1$snpID)
+    assoc2 <- assoc2[!(assoc2$variant.id %in% not1),]
+    expect_equal(nrow(assoc1), nrow(assoc2))
+    expect_equal(assoc1$Score, assoc2$Score)
+    expect_equal(assoc1$Var, (assoc2$Score.SE)^2)
+    expect_equal(assoc1$Score.Stat, (assoc2$Score.Stat)^2)
+    expect_equal(assoc1$Score.pval, assoc2$Score.pval)
+    
+    seqClose(svd)
+})
