@@ -203,6 +203,26 @@ test_that("assocTestSeq2 matches assocTestSeqWindow - SKAT", {
     seqClose(svd)
 })
 
+test_that("assocTestSeq2 matches assocTestSeqWindow - SKAT, binary", {
+    svd <- .testData()
+    nullmod <- GENESIS::fitNullReg(sampleData(svd), outcome="status", covars=c("sex", "age"), family="binomial", verbose=FALSE)
+    assoc1 <- GENESIS::assocTestSeqWindow(svd, nullmod, window.size=100, window.shift=50, test="SKAT", verbose=FALSE)
+    
+    nullmod <- fitNullModel2(svd, outcome="status", covars=c("sex", "age"), family="binomial", verbose=FALSE)
+    iterator <- SeqVarWindowIterator(svd, windowSize=1e5, windowShift=5e4, verbose=FALSE)
+    assoc2 <- assocTestSeq2(iterator, nullmod, test="SKAT", verbose=FALSE)
+
+    res1 <- assoc1$results[assoc1$results$dup %in% 0,]
+    res2 <- assoc2$results[assoc2$results$n.site > 0,]
+    chk <- function(x) {
+        fmt <- function(y) format(y, digits=4, scientific=FALSE, trim=TRUE)
+        paste(x$n.site, fmt(x$Q_0), fmt(x$pval_0), fmt(x$err_0), sep="_")
+    }
+    expect_true(setequal(chk(res1), chk(res2)))
+    
+    seqClose(svd)
+})
+
 test_that("assocTestSeq2 matches assocTestSeqWindow - SKAT, LMM", {
     svd <- .testData()
     grm <- .testGRM(svd)
@@ -217,6 +237,27 @@ test_that("assocTestSeq2 matches assocTestSeqWindow - SKAT, LMM", {
     res2 <- assoc2$results[assoc2$results$n.site > 0,]
     chk <- function(x) {
         fmt <- function(y) format(y, digits=4, scientific=FALSE, trim=TRUE)
+        paste(x$n.site, fmt(x$Q_0), fmt(x$pval_0), fmt(x$err_0), sep="_")
+    }
+    expect_true(setequal(chk(res1), chk(res2)))
+    
+    seqClose(svd)
+})
+
+test_that("assocTestSeq2 matches assocTestSeqWindow - SKAT, binary, LMM", {
+    svd <- .testData()
+    grm <- .testGRM(svd)
+    nullmod <- GENESIS::fitNullMM(sampleData(svd), outcome="status", covars=c("sex", "age"), covMatList=grm, family="binomial", verbose=FALSE)
+    assoc1 <- GENESIS::assocTestSeqWindow(svd, nullmod, window.size=100, window.shift=50, test="SKAT", verbose=FALSE)
+    
+    nullmod <- fitNullModel2(svd, outcome="status", covars=c("sex", "age"), covMatList=grm, family="binomial", verbose=FALSE)
+    iterator <- SeqVarWindowIterator(svd, windowSize=1e5, windowShift=5e4, verbose=FALSE)
+    assoc2 <- assocTestSeq2(iterator, nullmod, test="SKAT", verbose=FALSE)
+
+    res1 <- assoc1$results[assoc1$results$dup %in% 0,]
+    res2 <- assoc2$results[assoc2$results$n.site > 0,]
+    chk <- function(x) {
+        fmt <- function(y) format(y, digits=1, scientific=FALSE, trim=TRUE)
         paste(x$n.site, fmt(x$Q_0), fmt(x$pval_0), fmt(x$err_0), sep="_")
     }
     expect_true(setequal(chk(res1), chk(res2)))
