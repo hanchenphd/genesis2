@@ -16,12 +16,13 @@ test_that("assocTestMM2 matches assocTestMM - Wald", {
     svd <- .testData()
     grm <- .testGRM(svd)
     seqResetFilter(svd, verbose=FALSE)
-    nullmod <- fitNullModel2(svd, outcome="outcome", covMatList=grm, verbose=FALSE)
+    nullmod <- GENESIS::fitNullMM(sampleData(svd), outcome="outcome", covMatList=grm, verbose=FALSE)
     
     # multiallelic variants are handled differently
     snv <- isSNV(svd, biallelic=TRUE)
     assoc1 <- GENESIS::assocTestMM(svd, nullmod, snp.include=which(snv), verbose=FALSE)
     
+    nullmod <- fitNullModel2(svd, outcome="outcome", covMatList=grm, verbose=FALSE)
     seqSetFilter(svd, variant.sel=snv, verbose=FALSE)
     iterator <- SeqVarBlockIterator(svd, variantBlock=500, verbose=FALSE)
     assoc2 <- assocTestMM2(iterator, nullmod, verbose=FALSE)
@@ -46,12 +47,13 @@ test_that("assocTestMM2 matches assocTestMM - Score", {
     svd <- .testData()
     grm <- .testGRM(svd)
     seqResetFilter(svd, verbose=FALSE)
-    nullmod <- fitNullModel2(svd, outcome="outcome", covars=c("sex", "age"), covMatList=grm, verbose=FALSE)
+    nullmod <- GENESIS::fitNullMM(sampleData(svd), outcome="outcome", covars=c("sex", "age"), covMatList=grm, verbose=FALSE)
     
     # multiallelic variants are handled differently
     snv <- isSNV(svd, biallelic=TRUE)
     assoc1 <- GENESIS::assocTestMM(svd, nullmod, test="Score", snp.include=which(snv), verbose=FALSE)
     
+    nullmod <- fitNullModel2(svd, outcome="outcome", covars=c("sex", "age"), covMatList=grm, verbose=FALSE)
     seqSetFilter(svd, variant.sel=snv, verbose=FALSE)
     iterator <- SeqVarBlockIterator(svd, variantBlock=500, verbose=FALSE)
     assoc2 <- assocTestMM2(iterator, nullmod, test="Score", verbose=FALSE)
@@ -71,12 +73,13 @@ test_that("assocTestMM2 matches assocTestMM - binary", {
     svd <- .testData()
     grm <- .testGRM(svd)
     seqResetFilter(svd, verbose=FALSE)
-    nullmod <- fitNullModel2(svd, outcome="status", covars=c("sex", "age"), covMatList=grm, family="binomial", verbose=FALSE)
+    nullmod <- GENESIS::fitNullMM(sampleData(svd), outcome="status", covars=c("sex", "age"), covMatList=grm, family="binomial", verbose=FALSE)
     
     # multiallelic variants are handled differently
     snv <- isSNV(svd, biallelic=TRUE)
     assoc1 <- GENESIS::assocTestMM(svd, nullmod, test="Score", snp.include=which(snv), verbose=FALSE)
     
+    nullmod <- fitNullModel2(svd, outcome="status", covars=c("sex", "age"), covMatList=grm, family="binomial", verbose=FALSE)
     seqSetFilter(svd, variant.sel=snv, verbose=FALSE)
     iterator <- SeqVarBlockIterator(svd, variantBlock=500, verbose=FALSE)
     assoc2 <- assocTestMM2(iterator, nullmod, test="Score", verbose=FALSE)
@@ -85,7 +88,7 @@ test_that("assocTestMM2 matches assocTestMM - binary", {
     expect_equal(nrow(assoc1), nrow(assoc2))
     expect_equal(assoc1$Score, assoc2$Score)
     expect_equal(assoc1$Var, (assoc2$Score.SE)^2)
-    expect_equal(assoc1$Score.Stat, (assoc2$Score.Stat)^2)
+    expect_equal(assoc1$Score.Stat, (assoc2$Score.Stat)^2, tolerance=1e-7)
     expect_equal(assoc1$Score.pval, assoc2$Score.pval)
     
     seqClose(svd)

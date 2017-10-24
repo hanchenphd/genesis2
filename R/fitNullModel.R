@@ -15,7 +15,11 @@ setMethod("fitNullModel2",
                    dropZeros = TRUE,
                    verbose = TRUE) {
               desmat <- createDesignMatrix2(x, outcome, covars, sample.id)
-              group.idx <- .indexList(x[[group.var]])
+              if (!is.null(group.var)) {
+                  group.idx <- .indexList(x[[group.var]])
+              } else {
+                  group.idx <- NULL
+              }
               fitNullModel(y=desmat$y, X=desmat$X, covMatList=covMatList, group.idx=group.idx,
                            family=family, start=start, AIREML.tol=AIREML.tol, maxIter=maxIter,
                            dropZeros=dropZeros, verbose=verbose)
