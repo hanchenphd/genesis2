@@ -10,7 +10,7 @@ setMethod("assocTestSeq2",
           "SeqVarData",
           function(gdsobj, nullModel,
                    weight.beta=c(1,1), weight.user=NULL,
-                   test=c("Burden", "SKAT"),
+                   test=c("Burden", "SKAT", "Hybrid"),
                    burden.test=c("Score", "Wald"), rho=0,
                    pval.method=c("davies", "kuonen", "liu"),
                    verbose=TRUE) {
